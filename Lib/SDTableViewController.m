@@ -10,11 +10,19 @@
 
 
 @implementation SDTableViewController
-@synthesize fetchedResultsController, store, modelName, sortBy;
+@synthesize fetchedResultsController, store, modelName, sortBy, managedObjectContext;
 
+- (void)dealloc {
+	[store release];
+	[modelName release];
+	[sortBy release];
+	[managedObjectContext release];
+	[fetchedResultsController release];
+	[super dealloc];
+}
 
 - (void)viewDidLoad {
-    [super viewDidLoad];
+	[super viewDidLoad];
 	
 	NSError *error = nil;
 	if (![[self fetchedResultsController] performFetch:&error]) {
@@ -25,22 +33,22 @@
 
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return [[fetchedResultsController sections] count];
+	return [[fetchedResultsController sections] count];
 }
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	id <NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController sections] objectAtIndex:section];
-    return [sectionInfo numberOfObjects];
+	return [sectionInfo numberOfObjects];
 }
 
 - (NSFetchedResultsController *)fetchedResultsController {
-    
-    if (fetchedResultsController != nil) {
-        return fetchedResultsController;
-    }
-    
-    /*
+	
+	if (fetchedResultsController != nil) {
+		return fetchedResultsController;
+	}
+	
+	/*
 	 Set up the fetched results controller.
 	 */
 	// Create the fetch request for the entity.
@@ -55,13 +63,13 @@
 	// Edit the sort key as appropriate.
 	NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:self.sortBy ascending:NO];
 	NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
-//	
+	//	
 	[fetchRequest setSortDescriptors:sortDescriptors];
 	
 	// Edit the section name key path and cache name if appropriate.
-    // nil for section name key path means "no sections".
+	// nil for section name key path means "no sections".
 	NSFetchedResultsController *aFetchedResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest managedObjectContext:[self.store managedObjectContext] sectionNameKeyPath:nil cacheName:@"Root"];
-    aFetchedResultsController.delegate = self;
+	aFetchedResultsController.delegate = self;
 	self.fetchedResultsController = aFetchedResultsController;
 	
 	[aFetchedResultsController release];
@@ -81,9 +89,9 @@
 
 // Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the managed object for the given index path
+	
+	if (editingStyle == UITableViewCellEditingStyleDelete) {
+		// Delete the managed object for the given index path
 		NSManagedObjectContext *context = [fetchedResultsController managedObjectContext];
 		[context deleteObject:[fetchedResultsController objectAtIndexPath:indexPath]];
 		
@@ -105,45 +113,35 @@
 
 
 - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // The table view should not be re-orderable.
-    return NO;
+	// The table view should not be re-orderable.
+	return NO;
 }
-
-- (void)dealloc {
-	[fetchedResultsController release];
-    [super dealloc];
-}
-
-
-
-
-
 
 // Customize the appearance of table view cells.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    static NSString *CellIdentifier = @"Cell";
-    
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-    }
-    
+	
+	static NSString *CellIdentifier = @"Cell";
+	
+	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+	if (cell == nil) {
+		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+	}
+	
 	// Configure the cell.
 	NSManagedObject *managedObject = [fetchedResultsController objectAtIndexPath:indexPath];
-	cell.textLabel.text = [[managedObject valueForKey:@"name"] description];
+	cell.textLabel.text = [[managedObject valueForKey:self.sortBy] description];
 	
-    return cell;
+	return cell;
 }
 
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Navigation logic may go here -- for example, create and push another view controller.
+	// Navigation logic may go here -- for example, create and push another view controller.
 	/*
 	 <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-     NSManagedObject *selectedObject = [[self fetchedResultsController] objectAtIndexPath:indexPath];
-     // ...
-     // Pass the selected object to the new view controller.
+	 NSManagedObject *selectedObject = [[self fetchedResultsController] objectAtIndexPath:indexPath];
+	 // ...
+	 // Pass the selected object to the new view controller.
 	 [self.navigationController pushViewController:detailViewController animated:YES];
 	 [detailViewController release];
 	 */

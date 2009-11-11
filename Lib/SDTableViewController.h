@@ -10,6 +10,7 @@
 
 @interface SDTableViewController : UITableViewController <NSFetchedResultsControllerDelegate> {
 	NSFetchedResultsController *fetchedResultsController;
+	NSManagedObjectContext *managedObjectContext;
 	SimpleStore *store;
 	NSString *modelName;
 	NSString *sortBy;
